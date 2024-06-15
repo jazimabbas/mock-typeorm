@@ -11,9 +11,8 @@ export class MockTypeORM {
     this.mocks = {};
     this.mockHistory = {};
 
-    const originalCreateQueryRunner = DataSource.prototype.createQueryRunner;
-    Sinon.stub(DataSource.prototype, "createQueryRunner").callsFake(function () {
-      return mockCreateQueryRunner(originalCreateQueryRunner);
+    Sinon.stub(DataSource.prototype, "createQueryRunner").callsFake(function (this: any) {
+      return mockCreateQueryRunner.call(this);
     });
   }
 

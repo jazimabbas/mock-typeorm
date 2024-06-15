@@ -1,18 +1,12 @@
 import * as Sinon from "sinon";
-import { DataSource } from "typeorm";
+import { queryRunnerMethods } from "../constants/query-runner";
 
-export function mockCreateQueryRunner(
-  this: any,
-  originalCreateQueryRunner: DataSource["createQueryRunner"]
-) {
-  const queryRunner = originalCreateQueryRunner.apply(this);
-  const allQueryRunnerMethodKeys = Object.keys(queryRunner).filter(
-    (k) => typeof (queryRunner as any)[k] === "function"
-  );
+export function mockCreateQueryRunner(this: any) {
+  const queryRunner = {};
 
-  allQueryRunnerMethodKeys.forEach((method) => {
+  queryRunnerMethods.forEach((method) => {
     (queryRunner as any)[method] = Sinon.stub();
   });
 
-  return queryRunner;
+  return queryRunner as any;
 }
