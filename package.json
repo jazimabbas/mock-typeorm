@@ -11,6 +11,8 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.14.2",
+    "@types/sinon": "^17.0.3",
+    "sinon": "^18.0.0",
     "typeorm": "^0.3.20"
   }
 }

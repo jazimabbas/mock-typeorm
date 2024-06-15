@@ -1,4 +1,7 @@
-import { Constructor, MockHistory, MockState, SetMock } from "../type/mock-typeorm.types";
+import * as Sinon from "sinon";
+import { DataSource } from "typeorm";
+import { mockCreateQueryRunner } from "./helpers/mock-create-query-runner";
+import { Constructor, MockHistory, MockState, SetMock } from "./type/mock-typeorm.types";
 
 export class MockTypeORM {
   private mocks: MockState;
@@ -7,6 +10,11 @@ export class MockTypeORM {
   constructor() {
     this.mocks = {};
     this.mockHistory = {};
+
+    const originalCreateQueryRunner = DataSource.prototype.createQueryRunner;
+    Sinon.stub(DataSource.prototype, "createQueryRunner").callsFake(function () {
+      return mockCreateQueryRunner(originalCreateQueryRunner);
+    });
   }
 
   onMock(repository: string | Constructor<any>): SetMock {
