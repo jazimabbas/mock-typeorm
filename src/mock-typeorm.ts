@@ -7,10 +7,27 @@ import {
   queryBuilderReturnMethods,
   selfReferenceQueryBuilderMethods,
 } from "./constants/query-builder";
+import { mockMethod } from "./helpers/mock-method";
+import { repositoryMethods } from "./constants/repository";
 
 export class MockTypeORM {
-  private mocks: MockState;
-  private mockHistory: MockHistory;
+  private _mocks: MockState;
+  private _mockHistory: MockHistory;
+
+  public get mocks(): MockState {
+    return this._mocks;
+  }
+
+  public set mocks(value: MockState) {
+    this._mocks = value;
+  }
+
+  public get mockHistory(): MockHistory {
+    return this._mockHistory;
+  }
+  public set mockHistory(value: MockHistory) {
+    this._mockHistory = value;
+  }
 
   constructor() {
     this.mocks = {};
@@ -22,6 +39,7 @@ export class MockTypeORM {
 
     this.mockCreateQueryBuilder();
     this.mockSelectQueryBuilderMethods();
+    this.mockRepositoryMethods();
   }
 
   onMock(repository: string | Constructor<any>): SetMock {
@@ -82,25 +100,19 @@ export class MockTypeORM {
     queryBuilderReturnMethods.forEach((method) => {
       Sinon.stub(SelectQueryBuilder.prototype, method).callsFake(async function () {
         const repositoryName = this.__repositoryName;
-        if (!repositoryName) return {};
+        return mockMethod(self, method, repositoryName);
+      });
+    });
+  }
 
-        const repoMocks = self.mocks[repositoryName];
-        if (!repoMocks) return {};
+  private mockRepositoryMethods() {
+    const self = this;
 
-        const repoMethodMocks = repoMocks[method];
-        if (!repoMethodMocks) return {};
-
-        const mockDataExtractedFrom = self.mockHistory[repositoryName][method];
-        ++self.mockHistory[repositoryName][method];
-
-        const mockData =
-          self.mocks[repositoryName][method][mockDataExtractedFrom] ??
-          self.mocks[repositoryName][method][0];
-        if (!mockData) return {};
-
-        if (mockData instanceof Error) throw mockData;
-        return mockData;
-      } as any);
+    repositoryMethods.forEach((method) => {
+      Sinon.stub(Repository.prototype, method).callsFake(async function (this: any) {
+        const repositoryName = this.target?.name ?? "";
+        return mockMethod(self, method, repositoryName);
+      });
     });
   }
 }
