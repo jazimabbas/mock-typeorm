@@ -22,11 +22,17 @@ describe("DataSource", () => {
 
   describe("createQueryBuilder()", () => {
     describe("DataSource.createQueryBuilder()", () => {
+      const setup = () => {
+        return {
+          queryBuilder: dataSource.createQueryBuilder(Role, "role"),
+        };
+      };
+
       it("should return the correct role", async () => {
         const typeorm = new MockTypeORM();
         typeorm.onMock(Role).toReturn("role", "getOne");
 
-        const queryBuilder = dataSource.createQueryBuilder(Role, "role");
+        const { queryBuilder } = setup();
         const role = await queryBuilder.where("user.id = 1").select().getOne();
 
         expect(role).toEqual("role");
@@ -39,7 +45,7 @@ describe("DataSource", () => {
       it("should return the empty role if we didn't mock the method e.g. getOne() | getMany() etc..", async () => {
         new MockTypeORM();
 
-        const queryBuilder = dataSource.createQueryBuilder(Role, "role");
+        const { queryBuilder } = setup();
         const role = await queryBuilder.where("user.id = 1").select().getOne();
 
         expect(role).toEqual({});
@@ -53,7 +59,57 @@ describe("DataSource", () => {
         const typeorm = new MockTypeORM();
         typeorm.onMock(Role).toReturn(new Error("Something failed"), "getOne");
 
-        const queryBuilder = dataSource.createQueryBuilder(Role, "role");
+        const { queryBuilder } = setup();
+
+        await expect(queryBuilder.where("user.id = 1").select().getOne()).rejects.toThrowError(
+          /failed/i
+        );
+        expect((queryBuilder.where as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.select as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.getOne as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.getMany as SinonStub).callCount).toEqual(0); // just to test if we call this method or not
+      });
+    });
+
+    describe("Repository.createQueryBuilder()", () => {
+      const setup = () => {
+        return {
+          queryBuilder: dataSource.getRepository(Role).createQueryBuilder("role"),
+        };
+      };
+
+      it("should return the correct role", async () => {
+        const typeorm = new MockTypeORM();
+        typeorm.onMock(Role).toReturn("role", "getOne");
+
+        const { queryBuilder } = setup();
+        const role = await queryBuilder.where("user.id = 1").select().getOne();
+
+        expect(role).toEqual("role");
+        expect((queryBuilder.where as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.select as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.getOne as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.getMany as SinonStub).callCount).toEqual(0); // just to test if we call this method or not
+      });
+
+      it("should return the empty role if we didn't mock the method e.g. getOne() | getMany() etc..", async () => {
+        new MockTypeORM();
+
+        const { queryBuilder } = setup();
+        const role = await queryBuilder.where("user.id = 1").select().getOne();
+
+        expect(role).toEqual({});
+        expect((queryBuilder.where as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.select as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.getOne as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.getMany as SinonStub).callCount).toEqual(0); // just to test if we call this method or not
+      });
+
+      it("should throw an error if mock method throws an error", async () => {
+        const typeorm = new MockTypeORM();
+        typeorm.onMock(Role).toReturn(new Error("Something failed"), "getOne");
+
+        const { queryBuilder } = setup();
 
         await expect(queryBuilder.where("user.id = 1").select().getOne()).rejects.toThrowError(
           /failed/i

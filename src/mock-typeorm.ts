@@ -1,5 +1,5 @@
 import * as Sinon from "sinon";
-import { DataSource, SelectQueryBuilder } from "typeorm";
+import { DataSource, Repository, SelectQueryBuilder } from "typeorm";
 import { mockCreateQueryRunner } from "./helpers/mock-create-query-runner";
 import { Constructor, MockHistory, MockState, SetMock } from "./type/mock-typeorm.types";
 import { mockCreateQueryBuilder } from "./helpers/mock-create-query-builder";
@@ -59,6 +59,11 @@ export class MockTypeORM {
       param: any
     ): any {
       const repositoryName = param.name;
+      return mockCreateQueryBuilder.call(this, repositoryName);
+    });
+
+    Sinon.stub(Repository.prototype, "createQueryBuilder").callsFake(function (this: any) {
+      const repositoryName = this.target.name;
       return mockCreateQueryBuilder.call(this, repositoryName);
     });
   }
