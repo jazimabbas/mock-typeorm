@@ -1,4 +1,4 @@
-import { DataSource } from "typeorm";
+import { Column, DataSource, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 const dataSource = new DataSource({
   type: "mysql",
@@ -11,4 +11,13 @@ const dataSource = new DataSource({
   database: "mock",
 });
 
-export { dataSource };
+@Entity({ name: "roles" })
+class Role {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Column({ name: "name", type: "text", nullable: false })
+  name: string;
+}
+
+export { dataSource, Role };
