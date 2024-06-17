@@ -1,5 +1,5 @@
 import * as Sinon from "sinon";
-import { DataSource, Repository, SelectQueryBuilder } from "typeorm";
+import { DataSource, EntityManager, Repository, SelectQueryBuilder } from "typeorm";
 import { mockCreateQueryRunner } from "./helpers/mock-create-query-runner";
 import { Constructor, MockHistory, MockState, SetMock } from "./type/mock-typeorm.types";
 import { mockCreateQueryBuilder } from "./helpers/mock-create-query-builder";
@@ -9,6 +9,7 @@ import {
 } from "./constants/query-builder";
 import { mockMethod } from "./helpers/mock-method";
 import { repositoryMethods } from "./constants/repository";
+import { entityManagerModifyMethods, entityManagerQueryMethods } from "./constants/entity-manager";
 
 export class MockTypeORM {
   private _mocks: MockState;
@@ -33,13 +34,11 @@ export class MockTypeORM {
     this.mocks = {};
     this.mockHistory = {};
 
-    Sinon.stub(DataSource.prototype, "createQueryRunner").callsFake(function (this: any) {
-      return mockCreateQueryRunner.call(this);
-    });
-
+    this.mockCreateQueryRunner();
     this.mockCreateQueryBuilder();
     this.mockSelectQueryBuilderMethods();
     this.mockRepositoryMethods();
+    this.mockEntityManagerMethods();
   }
 
   onMock(repository: string | Constructor<any>): SetMock {
@@ -69,6 +68,12 @@ export class MockTypeORM {
         return this;
       },
     };
+  }
+
+  private mockCreateQueryRunner() {
+    Sinon.stub(DataSource.prototype, "createQueryRunner").callsFake(function (this: any) {
+      return mockCreateQueryRunner.call(this);
+    });
   }
 
   private mockCreateQueryBuilder() {
@@ -113,6 +118,46 @@ export class MockTypeORM {
         const repositoryName = this.target?.name ?? "";
         return mockMethod(self, method, repositoryName);
       });
+    });
+  }
+
+  private mockEntityManagerMethods() {
+    const self = this;
+
+    const getRepositoryName = (param: any) => {
+      let repositoryName = param.repositoryName ?? param?.constructor?.name;
+      if (Array.isArray(param)) {
+        const lastRecord = param[param.length - 1];
+        repositoryName = lastRecord?.repositoryName ?? lastRecord?.constructor?.name;
+      }
+      return repositoryName;
+    };
+
+    entityManagerQueryMethods.forEach((method: any) => {
+      Sinon.stub(EntityManager.prototype, method).callsFake(async function (this: any, param: any) {
+        const repositoryName = param.name;
+        return mockMethod(self, method, repositoryName);
+      });
+    });
+
+    entityManagerModifyMethods.forEach((method) => {
+      Sinon.stub(EntityManager.prototype, method).callsFake(async function (param: any) {
+        const repositoryName = getRepositoryName(param);
+        if (!repositoryName) return {};
+
+        return mockMethod(self, method, repositoryName);
+      });
+    });
+
+    Sinon.stub(EntityManager.prototype, "create").callsFake(function (
+      Repository: any,
+      params: any
+    ) {
+      const repository = new Repository(params);
+      Object.keys(params).forEach((k) => {
+        repository[k] = params[k];
+      });
+      return repository;
     });
   }
 }

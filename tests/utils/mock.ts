@@ -20,4 +20,13 @@ class Role {
   name: string;
 }
 
-export { dataSource, Role };
+@Entity({ name: "users" })
+class User {
+  @PrimaryGeneratedColumn("uuid")
+  id: string;
+
+  @Column({ name: "name", type: "text", nullable: false })
+  name: string;
+}
+
+export { dataSource, Role, User };
