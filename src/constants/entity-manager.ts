@@ -16,6 +16,7 @@ export type EntityManagerSetMockMethods = keyof Omit<
   | "getId"
   | "create"
   | "merge"
+  | "transaction"
 >;
 
 export const entityManagerQueryMethods: EntityManagerSetMockMethods[] = [
@@ -47,7 +48,6 @@ export const entityManagerQueryMethods: EntityManagerSetMockMethods[] = [
   "restore",
   "softDelete",
   "sum",
-  "transaction",
   "update",
   "upsert",
 ];

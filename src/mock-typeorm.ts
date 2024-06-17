@@ -159,5 +159,18 @@ export class MockTypeORM {
       });
       return repository;
     });
+
+    Sinon.stub(EntityManager.prototype, "transaction").callsFake(async function (
+      isolationLevelOrCallback: any,
+      callback: any
+    ) {
+      const manager = this.connection.manager;
+
+      if (typeof isolationLevelOrCallback === "string") {
+        callback(manager);
+      } else {
+        isolationLevelOrCallback(manager);
+      }
+    });
   }
 }
