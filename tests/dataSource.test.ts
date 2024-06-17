@@ -90,4 +90,32 @@ describe("DataSource", () => {
       });
     });
   });
+
+  describe("transaction", () => {
+    it("should run method inside transaction", async () => {
+      const mockRoles = ["role"];
+      const typeorm = new MockTypeORM();
+      typeorm.onMock(Role).toReturn(mockRoles, "find");
+
+      let roles: any;
+      await dataSource.transaction(async (manager) => {
+        roles = await manager.find(Role, {});
+      });
+
+      expect(roles).toEqual(mockRoles);
+    });
+
+    it("should run method inside transaction with isolation level passed in", async () => {
+      const mockRoles = ["role1"];
+      const typeorm = new MockTypeORM();
+      typeorm.onMock(Role).toReturn(mockRoles, "find");
+
+      let roles: any;
+      await dataSource.manager.transaction("READ COMMITTED", async (manager) => {
+        roles = await manager.find(Role, {});
+      });
+
+      expect(roles).toEqual(mockRoles);
+    });
+  });
 });
