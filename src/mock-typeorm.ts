@@ -10,6 +10,7 @@ import {
 import { mockMethod } from "./helpers/mock-method";
 import { repositoryMethods } from "./constants/repository";
 import { entityManagerModifyMethods, entityManagerQueryMethods } from "./constants/entity-manager";
+import { dataSourceMethods } from "./constants/dataSource";
 
 export class MockTypeORM {
   private _mocks: MockState;
@@ -34,6 +35,7 @@ export class MockTypeORM {
     this.mocks = {};
     this.mockHistory = {};
 
+    this.mockDataSouceMethods();
     this.mockCreateQueryRunner();
     this.mockCreateQueryBuilder();
     this.mockSelectQueryBuilderMethods();
@@ -68,6 +70,12 @@ export class MockTypeORM {
         return this;
       },
     };
+  }
+
+  private mockDataSouceMethods() {
+    dataSourceMethods.forEach((method) => {
+      Sinon.stub(DataSource.prototype, method);
+    });
   }
 
   private mockCreateQueryRunner() {

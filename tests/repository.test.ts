@@ -1,5 +1,4 @@
 import Sinon from "sinon";
-import { describe, it, afterEach } from "vitest";
 import { MockTypeORM } from "../src/mock-typeorm";
 import { dataSource, Role } from "./utils/mock";
 import { mockRepositoryMethods } from "./utils/data";

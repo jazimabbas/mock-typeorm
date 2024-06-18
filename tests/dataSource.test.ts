@@ -1,8 +1,9 @@
+import { DataSource } from "typeorm";
 import Sinon, { SinonStub } from "sinon";
-import { describe, expect, it, afterEach } from "vitest";
 import { dataSource, Role } from "./utils/mock";
 import { MockTypeORM } from "../src/mock-typeorm";
 import { queryRunnerMethods } from "../src/constants/query-runner";
+import { DataSourceMethods } from "../src/constants/dataSource";
 
 describe("DataSource", () => {
   afterEach(() => {
@@ -17,6 +18,22 @@ describe("DataSource", () => {
       await (queryRunner[method] as any)();
 
       expect((queryRunner[method] as SinonStub).callCount).toEqual(1);
+    });
+
+    it("should return correct payload with manager methods", async () => {
+      const mockRole = { id: "1", name: "a" };
+      const typeorm = new MockTypeORM();
+      typeorm.onMock(Role).toReturn(mockRole, "findOne");
+
+      const queryRunner = dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const role = await queryRunner.manager.findOne(Role, { where: {} });
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+
+      expect(true).toBeTruthy();
+      expect(role).toEqual(mockRole);
     });
   });
 
@@ -116,6 +133,26 @@ describe("DataSource", () => {
       });
 
       expect(roles).toEqual(mockRoles);
+    });
+  });
+
+  describe("methods", () => {
+    const methods: { method: DataSourceMethods; setup: any }[] = [
+      { method: "initialize", setup: () => dataSource.initialize() },
+      { method: "destroy", setup: () => dataSource.destroy() },
+      { method: "dropDatabase", setup: () => dataSource.dropDatabase() },
+      { method: "runMigrations", setup: () => dataSource.runMigrations() },
+      { method: "showMigrations", setup: () => dataSource.showMigrations() },
+      { method: "synchronize", setup: () => dataSource.synchronize() },
+      { method: "undoLastMigration", setup: () => dataSource.undoLastMigration() },
+    ];
+
+    it.each(methods)("should mock $method", async ({ method, setup }) => {
+      new MockTypeORM();
+
+      await setup();
+
+      expect((DataSource.prototype[method] as SinonStub).callCount).toEqual(1);
     });
   });
 });
