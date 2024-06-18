@@ -1,6 +1,6 @@
 import Sinon from "sinon";
+import MockTypeORM from "../src";
 import { dataSource, Role, User } from "./utils/mock";
-import { MockTypeORM } from "../src/mock-typeorm";
 import {
   entityManagerModifyMethods,
   entityManagerQueryMethods,

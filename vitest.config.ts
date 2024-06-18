@@ -20,6 +20,6 @@ export default defineConfig({
   test: {
     globals: true,
     includeSource: ["src/**/*.{js,ts}", "tests/**/*.{js,ts}"],
-    exclude: [...configDefaults.exclude, "**/node_modules/**", "**/build/**"],
+    exclude: [...configDefaults.exclude, "**/node_modules/**", "**/dist/**"],
   },
 });

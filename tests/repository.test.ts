@@ -1,5 +1,5 @@
 import Sinon from "sinon";
-import { MockTypeORM } from "../src/mock-typeorm";
+import MockTypeORM from "../src";
 import { dataSource, Role } from "./utils/mock";
 import { mockRepositoryMethods } from "./utils/data";
 

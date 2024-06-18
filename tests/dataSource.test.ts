@@ -1,7 +1,7 @@
 import { DataSource } from "typeorm";
 import Sinon, { SinonStub } from "sinon";
 import { dataSource, Role } from "./utils/mock";
-import { MockTypeORM } from "../src/mock-typeorm";
+import MockTypeORM from "../src";
 import { queryRunnerMethods } from "../src/constants/query-runner";
 import { DataSourceMethods } from "../src/constants/dataSource";
 

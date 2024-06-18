@@ -4,12 +4,14 @@
     "module": "ES6",
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "outDir": "./build",
+    "outDir": "./dist/esm",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "types": ["vitest/globals"],
     "strict": false,
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "declaration": true,
+    "declarationDir": "./dist/types"
   },
   "include": ["src/**/*", "tests/**/*"],
   "exclude": ["node_modules"]
