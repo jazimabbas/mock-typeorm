@@ -1,4 +1,5 @@
 import { DataSource } from "typeorm";
+import { describe, afterEach, it, expect } from "vitest";
 import Sinon, { SinonStub } from "sinon";
 import { dataSource, Role } from "./utils/mock";
 import MockTypeORM from "../src";

@@ -7,12 +7,14 @@
     "outDir": "./dist/esm",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "types": ["vitest/globals"],
     "strict": false,
     "moduleResolution": "Node",
     "declaration": true,
-    "declarationDir": "./dist/types"
+    "declarationDir": "./dist/types",
+    "paths": {
+      "rollup/parseAst": ["./node_modules/rollup/dist/parseAst"]
+    }
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules"]
 }

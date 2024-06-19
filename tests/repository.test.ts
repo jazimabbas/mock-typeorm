@@ -1,4 +1,5 @@
 import Sinon from "sinon";
+import { describe, afterEach, it, expect } from "vitest";
 import MockTypeORM from "../src";
 import { dataSource, Role } from "./utils/mock";
 import { mockRepositoryMethods } from "./utils/data";
@@ -13,7 +14,7 @@ describe("Repository", () => {
       "should mock repository method $methodLabel with correct return data",
       async ({ method, mockData }) => {
         const typeorm = new MockTypeORM();
-        typeorm.onMock(Role).toReturn(mockData, method);
+        typeorm.onMock(Role).toReturn(mockData, method as any);
 
         const roleRepository = dataSource.getRepository(Role);
         const result = await roleRepository[method as any]();
