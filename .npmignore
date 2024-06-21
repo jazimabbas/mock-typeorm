@@ -1,0 +1,11 @@
+/node_modules
+
+/src
+/tests
+.github
+.gitignore
+rollup.config.js
+tsconfig.json
+vitest.config.ts
+
+.DS_Store
