@@ -185,7 +185,16 @@ export class MockTypeORM {
 
     entityManagerQueryMethods.forEach((method: any) => {
       Sinon.stub(EntityManager.prototype, method).callsFake(async function (this: any, param: any) {
-        const repositoryName = param.name;
+        let repositoryName: string;
+
+        if (param instanceof EntitySchema) {
+          repositoryName = param.options.name;
+        } else if (typeof param === "string") {
+          repositoryName = param;
+        } else {
+          repositoryName = param.name;
+        }
+
         return mockMethod(self, method, repositoryName);
       });
     });
@@ -203,7 +212,13 @@ export class MockTypeORM {
       Repository: any,
       params: any
     ) {
-      const repository = new Repository(params);
+      if (Repository instanceof EntitySchema) {
+        Repository = createClass(Repository.options.name);
+      } else if (typeof Repository === "string") {
+        Repository = createClass(Repository);
+      }
+
+      const repository = new Repository();
       Object.keys(params).forEach((k) => {
         repository[k] = params[k];
       });
@@ -223,4 +238,20 @@ export class MockTypeORM {
       }
     });
   }
+}
+
+function createClass(name: string) {
+  const DynamicClass = class {
+    constructor() {}
+  };
+
+  const handler = {
+    construct(target: any, args: any[]) {
+      const instance = Reflect.construct(target, args);
+      Object.defineProperty(instance.constructor, "name", { value: name, writable: false });
+      return instance;
+    },
+  };
+
+  return new Proxy(DynamicClass, handler as any);
 }

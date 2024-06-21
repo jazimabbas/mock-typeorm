@@ -1,7 +1,7 @@
 import Sinon from "sinon";
 import { beforeEach, describe, expect, it, afterEach, afterAll, beforeAll } from "vitest";
 import { MockTypeORM } from "../src";
-import { dataSource, Role, UserEntitySchema } from "./utils/mock";
+import { dataSource, Role, User, UserEntitySchema } from "./utils/mock";
 
 describe("Main", () => {
   let typeorm: MockTypeORM;
@@ -92,17 +92,31 @@ describe("EntitySchema", () => {
     expect(users).toEqual(["user"]);
   });
 
-  it("EntitySchema queryRunner", async () => {
-    const typeorm = new MockTypeORM();
-    typeorm.onMock("UserEntitySchema").toReturn({ id: "1", name: "a" }, "findOne");
+  describe("queryRunner", () => {
+    it("EntitySchema queryRunner", async () => {
+      const typeorm = new MockTypeORM();
+      const mockUser = { id: "1", name: "a" };
+      typeorm.onMock("UserEntitySchema").toReturn(mockUser, "findOne");
 
-    const queryRunner = dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    const user = await queryRunner.manager.findOne(UserEntitySchema as any, { where: {} });
-    await queryRunner.commitTransaction();
-    await queryRunner.release();
+      const queryRunner = dataSource.createQueryRunner();
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+      const user = await queryRunner.manager.findOne("UserEntitySchema" as any, { where: {} });
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
 
-    expect(true).toBeTruthy();
+      expect(user).toEqual(mockUser);
+    });
+
+    it("should save record", async () => {
+      const typeorm = new MockTypeORM();
+      const mockUser = { id: "newId", name: "a" };
+      typeorm.onMock("UserEntitySchema").toReturn(mockUser, "save");
+
+      const user = dataSource.manager.create("UserEntitySchema" as any, mockUser);
+      const newUser = await dataSource.manager.save(user);
+
+      expect(newUser).toEqual(mockUser);
+    });
   });
 });
