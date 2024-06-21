@@ -1,7 +1,7 @@
 import * as Sinon from "sinon";
 import { DataSource, EntityManager, Repository, SelectQueryBuilder } from "typeorm";
 import { mockCreateQueryRunner } from "./helpers/mock-create-query-runner";
-import { Constructor, MockHistory, MockState, SetMock } from "./type/mock-typeorm.types";
+import { Constructor, MockHistory, MockState, SetMock, Methods } from "./type/mock-typeorm.types";
 import { mockCreateQueryBuilder } from "./helpers/mock-create-query-builder";
 import {
   queryBuilderReturnMethods,
@@ -48,7 +48,7 @@ export class MockTypeORM {
     const repositoryName = typeof repository === "string" ? repository : repository.name;
 
     return {
-      toReturn(mockData: any, method: string = "find") {
+      toReturn(mockData: any, method = "find") {
         if (!self.mocks[repositoryName]) {
           self.mocks[repositoryName] = {};
         }

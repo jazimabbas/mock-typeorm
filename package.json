@@ -11,6 +11,9 @@
       "import": "./dist/esm/index.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build:types": "tsc --emitDeclarationOnly",
     "build": "rimraf ./dist && npm run build:types && rollup -c",

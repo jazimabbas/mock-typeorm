@@ -1,3 +1,4 @@
+import Sinon from "sinon";
 import { MockTypeORM } from "./mock-typeorm";
 
-export default MockTypeORM;
+export { MockTypeORM, Sinon };
