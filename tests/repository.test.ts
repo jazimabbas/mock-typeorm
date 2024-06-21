@@ -1,7 +1,7 @@
 import Sinon from "sinon";
 import { describe, afterEach, it, expect } from "vitest";
 import { MockTypeORM } from "../src";
-import { dataSource, Role } from "./utils/mock";
+import { dataSource, Role, UserEntitySchema } from "./utils/mock";
 import { mockRepositoryMethods } from "./utils/data";
 
 describe("Repository", () => {
@@ -43,5 +43,30 @@ describe("Repository", () => {
     const roleRepository = dataSource.getRepository(Role);
 
     await expect(roleRepository.find({})).rejects.toThrowError(/failed/i);
+  });
+
+  describe("EntitySchema", () => {
+    it("should return correct payload when passing EntitySchema as a class", async () => {
+      const typeorm = new MockTypeORM();
+      const mockUsers = [{ id: "1", name: "a" }];
+      typeorm.onMock("UserEntitySchema").toReturn(mockUsers, "find");
+
+      const users = await dataSource.getRepository(UserEntitySchema).find();
+
+      expect(users).toEqual(mockUsers);
+    });
+  });
+
+  describe("EntityManager", () => {
+    it("should return correct data when we use getRepository of EntityManager", async () => {
+      const mockRoles = { name: "role" };
+      const typeorm = new MockTypeORM();
+      typeorm.onMock(Role).toReturn(mockRoles, "findOne");
+
+      const roleRepository = dataSource.manager.getRepository(Role);
+      const roles = await roleRepository.findOne({});
+
+      expect(roles).toEqual(mockRoles);
+    });
   });
 });

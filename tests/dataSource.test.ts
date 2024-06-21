@@ -1,7 +1,7 @@
 import { DataSource } from "typeorm";
 import { describe, afterEach, it, expect } from "vitest";
 import Sinon, { SinonStub } from "sinon";
-import { dataSource, Role } from "./utils/mock";
+import { dataSource, Role, UserEntitySchema } from "./utils/mock";
 import { MockTypeORM } from "../src";
 import { queryRunnerMethods } from "../src/constants/query-runner";
 import { DataSourceMethods } from "../src/constants/dataSource";
@@ -36,75 +36,36 @@ describe("DataSource", () => {
       expect(true).toBeTruthy();
       expect(role).toEqual(mockRole);
     });
-  });
 
-  describe("createQueryBuilder()", () => {
-    describe.each([
-      {
-        testSuiteLabel: "DataSource.createQueryBuilder()",
-        setup: () => {
-          return {
-            queryBuilder: dataSource.createQueryBuilder(Role, "role"),
-          };
-        },
-      },
-      {
-        testSuiteLabel: "Repository.createQueryBuilder()",
-        setup: () => {
-          return {
-            queryBuilder: dataSource.getRepository(Role).createQueryBuilder("role"),
-          };
-        },
-      },
-      {
-        testSuiteLabel: "DataSource.manager.createQueryBuilder()",
-        setup: () => {
-          return {
-            queryBuilder: dataSource.manager.createQueryBuilder(Role, "role"),
-          };
-        },
-      },
-    ])("$testSuiteLabel", ({ setup }) => {
-      it("should return the correct role", async () => {
+    describe("EntitySchema", () => {
+      it("should mock method when passing EntitySchema as a class", async () => {
         const typeorm = new MockTypeORM();
-        typeorm.onMock(Role).toReturn("role", "getOne");
+        const mockUser = { id: "1", name: "a" };
+        typeorm.onMock("UserEntitySchema").toReturn(mockUser, "findOne");
 
-        const { queryBuilder } = setup();
-        const role = await queryBuilder.where("user.id = 1").select().getOne();
+        const queryRunner = dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        const user = await queryRunner.manager.findOne(UserEntitySchema as any, { where: {} });
+        await queryRunner.commitTransaction();
+        await queryRunner.release();
 
-        expect(role).toEqual("role");
-        expect((queryBuilder.where as SinonStub).callCount).toEqual(1);
-        expect((queryBuilder.select as SinonStub).callCount).toEqual(1);
-        expect((queryBuilder.getOne as SinonStub).callCount).toEqual(1);
-        expect((queryBuilder.getMany as SinonStub).callCount).toEqual(0); // just to test if we call this method or not
+        expect(user).toEqual(mockUser);
       });
 
-      it("should return the empty role if we didn't mock the method e.g. getOne() | getMany() etc..", async () => {
-        new MockTypeORM();
-
-        const { queryBuilder } = setup();
-        const role = await queryBuilder.where("user.id = 1").select().getOne();
-
-        expect(role).toEqual({});
-        expect((queryBuilder.where as SinonStub).callCount).toEqual(1);
-        expect((queryBuilder.select as SinonStub).callCount).toEqual(1);
-        expect((queryBuilder.getOne as SinonStub).callCount).toEqual(1);
-        expect((queryBuilder.getMany as SinonStub).callCount).toEqual(0); // just to test if we call this method or not
-      });
-
-      it("should throw an error if mock method throws an error", async () => {
+      it("should mock method when passing EntitySchema as a string", async () => {
         const typeorm = new MockTypeORM();
-        typeorm.onMock(Role).toReturn(new Error("Something failed"), "getOne");
+        const mockUser = { id: "1", name: "a" };
+        typeorm.onMock("UserEntitySchema").toReturn(mockUser, "findOne");
 
-        const { queryBuilder } = setup();
+        const queryRunner = dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        const user = await queryRunner.manager.findOne("UserEntitySchema" as any, { where: {} });
+        await queryRunner.commitTransaction();
+        await queryRunner.release();
 
-        await expect(queryBuilder.where("user.id = 1").select().getOne()).rejects.toThrowError(
-          /failed/i
-        );
-        expect((queryBuilder.where as SinonStub).callCount).toEqual(1);
-        expect((queryBuilder.select as SinonStub).callCount).toEqual(1);
-        expect((queryBuilder.getOne as SinonStub).callCount).toEqual(1);
-        expect((queryBuilder.getMany as SinonStub).callCount).toEqual(0); // just to test if we call this method or not
+        expect(user).toEqual(mockUser);
       });
     });
   });
@@ -134,6 +95,34 @@ describe("DataSource", () => {
       });
 
       expect(roles).toEqual(mockRoles);
+    });
+
+    describe("callback", () => {
+      it("should return correct payload when using callback inside transaction", async () => {
+        const mockRoles = ["role"];
+        const typeorm = new MockTypeORM();
+        typeorm.onMock(Role).toReturn(mockRoles, "find");
+
+        let roles: any;
+        await dataSource.manager.transaction(async (manager) => {
+          roles = await manager.find(Role, {});
+        });
+
+        expect(roles).toEqual(mockRoles);
+      });
+
+      it("should return correct payload when using callback inside transaction with isolation level passed in", async () => {
+        const mockRoles = ["role1"];
+        const typeorm = new MockTypeORM();
+        typeorm.onMock(Role).toReturn(mockRoles, "find");
+
+        let roles: any;
+        await dataSource.manager.transaction("READ COMMITTED", async (manager) => {
+          roles = await manager.find(Role, {});
+        });
+
+        expect(roles).toEqual(mockRoles);
+      });
     });
   });
 

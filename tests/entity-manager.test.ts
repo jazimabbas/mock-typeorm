@@ -1,7 +1,7 @@
 import Sinon from "sinon";
 import { describe, afterEach, it, expect } from "vitest";
 import { MockTypeORM } from "../src";
-import { dataSource, Role, User } from "./utils/mock";
+import { dataSource, Role, User, UserEntitySchema } from "./utils/mock";
 import {
   entityManagerModifyMethods,
   entityManagerQueryMethods,
@@ -58,6 +58,30 @@ describe("EntityManager", () => {
     });
   });
 
+  describe("EntitySchema", () => {
+    it("should save record when passing EntitySchema as a class", async () => {
+      const typeorm = new MockTypeORM();
+      const mockUser = { id: "1", name: "a" };
+      typeorm.onMock("UserEntitySchema").toReturn(mockUser, "save");
+
+      const user = dataSource.manager.create(UserEntitySchema as any, mockUser);
+      const newUser = await dataSource.manager.save(user);
+
+      expect(newUser).toEqual(mockUser);
+    });
+
+    it("should save record when passing EntitySchema as a string", async () => {
+      const typeorm = new MockTypeORM();
+      const mockUser = { id: "1", name: "a" };
+      typeorm.onMock("UserEntitySchema").toReturn(mockUser, "save");
+
+      const user = dataSource.manager.create("UserEntitySchema" as any, mockUser);
+      const newUser = await dataSource.manager.save(user);
+
+      expect(newUser).toEqual(mockUser);
+    });
+  });
+
   describe("query methods", () => {
     it.each(entityManagerQueryMethods)(
       "should return correct payload when we mock the method '%s'",
@@ -70,46 +94,5 @@ describe("EntityManager", () => {
         expect(role).toEqual(["role"]);
       }
     );
-  });
-
-  describe("getRepository()", () => {
-    it("should return correct data when we use getRepository of EntityManager", async () => {
-      const mockRoles = { name: "role" };
-      const typeorm = new MockTypeORM();
-      typeorm.onMock(Role).toReturn(mockRoles, "findOne");
-
-      const roleRepository = dataSource.manager.getRepository(Role);
-      const roles = await roleRepository.findOne({});
-
-      expect(roles).toEqual(mockRoles);
-    });
-  });
-
-  describe("transaction()", () => {
-    it("should run method inside transaction", async () => {
-      const mockRoles = ["role"];
-      const typeorm = new MockTypeORM();
-      typeorm.onMock(Role).toReturn(mockRoles, "find");
-
-      let roles: any;
-      await dataSource.manager.transaction(async (manager) => {
-        roles = await manager.find(Role, {});
-      });
-
-      expect(roles).toEqual(mockRoles);
-    });
-
-    it("should run method inside transaction with isolation level passed in", async () => {
-      const mockRoles = ["role1"];
-      const typeorm = new MockTypeORM();
-      typeorm.onMock(Role).toReturn(mockRoles, "find");
-
-      let roles: any;
-      await dataSource.manager.transaction("READ COMMITTED", async (manager) => {
-        roles = await manager.find(Role, {});
-      });
-
-      expect(roles).toEqual(mockRoles);
-    });
   });
 });

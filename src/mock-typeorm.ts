@@ -112,6 +112,8 @@ export class MockTypeORM {
 
       if (param instanceof EntitySchema) {
         repositoryName = param.options.name;
+      } else if (typeof param === "string") {
+        repositoryName = param;
       } else {
         repositoryName = param.name;
       }
@@ -124,6 +126,8 @@ export class MockTypeORM {
 
       if (this.target instanceof EntitySchema) {
         repositoryName = this.target.options.name;
+      } else if (typeof this.target === "string") {
+        repositoryName = this.target;
       } else {
         repositoryName = this.target.name;
       }
