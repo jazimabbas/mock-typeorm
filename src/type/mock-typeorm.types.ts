@@ -26,5 +26,6 @@ export interface Constructor<T> {
 }
 
 export interface SetMock {
-  toReturn(mockData: any, method: Methods): this;
+  toReturn(mockData: any, method?: Methods): this;
+  reset(method?: Methods): void;
 }

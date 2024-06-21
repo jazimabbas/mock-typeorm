@@ -1,7 +1,7 @@
 import * as Sinon from "sinon";
 import { DataSource, EntityManager, Repository, SelectQueryBuilder } from "typeorm";
 import { mockCreateQueryRunner } from "./helpers/mock-create-query-runner";
-import { Constructor, MockHistory, MockState, SetMock, Methods } from "./type/mock-typeorm.types";
+import { Constructor, MockHistory, MockState, SetMock } from "./type/mock-typeorm.types";
 import { mockCreateQueryBuilder } from "./helpers/mock-create-query-builder";
 import {
   queryBuilderReturnMethods,
@@ -69,7 +69,26 @@ export class MockTypeORM {
 
         return this;
       },
+      reset(method) {
+        if (method) {
+          if (self.mocks[repositoryName]) delete self.mocks[repositoryName][method];
+          if (self.mockHistory[repositoryName]) delete self.mockHistory[repositoryName][method];
+          return;
+        }
+
+        delete self.mocks[repositoryName];
+        delete self.mockHistory[repositoryName];
+      },
     };
+  }
+
+  resetAll() {
+    this.mocks = {};
+    this.mockHistory = {};
+  }
+
+  restore() {
+    Sinon.restore();
   }
 
   private mockDataSouceMethods() {
