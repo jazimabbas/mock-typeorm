@@ -1,4 +1,4 @@
-import { Column, DataSource, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, DataSource, Entity, EntitySchema, PrimaryGeneratedColumn } from "typeorm";
 
 const dataSource = new DataSource({
   type: "mysql",
@@ -29,4 +29,10 @@ class User {
   name: string;
 }
 
-export { dataSource, Role, User };
+const UserEntitySchema = new EntitySchema({
+  name: "UserEntitySchema",
+  tableName: "userEntitySchema",
+  columns: [],
+});
+
+export { dataSource, Role, User, UserEntitySchema };

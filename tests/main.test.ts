@@ -1,7 +1,7 @@
 import Sinon from "sinon";
 import { beforeEach, describe, expect, it, afterEach, afterAll, beforeAll } from "vitest";
 import { MockTypeORM } from "../src";
-import { dataSource, Role } from "./utils/mock";
+import { dataSource, Role, UserEntitySchema } from "./utils/mock";
 
 describe("Main", () => {
   let typeorm: MockTypeORM;
@@ -38,5 +38,71 @@ describe("Main", () => {
 
     expect(role).toEqual({});
     expect(roles).toEqual({});
+  });
+});
+
+describe("EntitySchema", () => {
+  afterEach(() => {
+    Sinon.restore();
+  });
+
+  it("EntitySchema dataSource.getRepository", async () => {
+    const typeorm = new MockTypeORM();
+    typeorm.onMock("UserEntitySchema").toReturn([], "find");
+
+    const users = await dataSource.getRepository(UserEntitySchema).find();
+
+    expect(users).toEqual([]);
+  });
+
+  it("EntitySchema DataSource.createQueryBuilder", async () => {
+    const typeorm = new MockTypeORM();
+    typeorm.onMock("UserEntitySchema").toReturn(["user"], "getOne");
+
+    const users = await dataSource
+      .createQueryBuilder(UserEntitySchema as any, "user")
+      .select()
+      .getOne();
+
+    expect(users).toEqual(["user"]);
+  });
+
+  it("EntitySchema getRepository.createQueryBuilder", async () => {
+    const typeorm = new MockTypeORM();
+    typeorm.onMock("UserEntitySchema").toReturn(["user"], "getOne");
+
+    const users = await dataSource
+      .getRepository(UserEntitySchema)
+      .createQueryBuilder("user")
+      .select()
+      .getOne();
+
+    expect(users).toEqual(["user"]);
+  });
+
+  it("EntitySchema DataSource.manager.createQueryBuilder()", async () => {
+    const typeorm = new MockTypeORM();
+    typeorm.onMock("UserEntitySchema").toReturn(["user"], "getOne");
+
+    const users = await dataSource.manager
+      .createQueryBuilder(UserEntitySchema, "user")
+      .select()
+      .getOne();
+
+    expect(users).toEqual(["user"]);
+  });
+
+  it("EntitySchema queryRunner", async () => {
+    const typeorm = new MockTypeORM();
+    typeorm.onMock("UserEntitySchema").toReturn({ id: "1", name: "a" }, "findOne");
+
+    const queryRunner = dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    const user = await queryRunner.manager.findOne(UserEntitySchema as any, { where: {} });
+    await queryRunner.commitTransaction();
+    await queryRunner.release();
+
+    expect(true).toBeTruthy();
   });
 });

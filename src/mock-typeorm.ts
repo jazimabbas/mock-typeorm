@@ -1,5 +1,5 @@
 import * as Sinon from "sinon";
-import { DataSource, EntityManager, Repository, SelectQueryBuilder } from "typeorm";
+import { DataSource, EntityManager, EntitySchema, Repository, SelectQueryBuilder } from "typeorm";
 import { mockCreateQueryRunner } from "./helpers/mock-create-query-runner";
 import { Constructor, MockHistory, MockState, SetMock } from "./type/mock-typeorm.types";
 import { mockCreateQueryBuilder } from "./helpers/mock-create-query-builder";
@@ -108,12 +108,26 @@ export class MockTypeORM {
       this: any,
       param: any
     ): any {
-      const repositoryName = param.name;
+      let repositoryName: string;
+
+      if (param instanceof EntitySchema) {
+        repositoryName = param.options.name;
+      } else {
+        repositoryName = param.name;
+      }
+
       return mockCreateQueryBuilder.call(this, repositoryName);
     });
 
     Sinon.stub(Repository.prototype, "createQueryBuilder").callsFake(function (this: any) {
-      const repositoryName = this.target.name;
+      let repositoryName: string;
+
+      if (this.target instanceof EntitySchema) {
+        repositoryName = this.target.options.name;
+      } else {
+        repositoryName = this.target.name;
+      }
+
       return mockCreateQueryBuilder.call(this, repositoryName);
     });
   }
@@ -123,7 +137,7 @@ export class MockTypeORM {
 
     selfReferenceQueryBuilderMethods.forEach((method) => {
       Sinon.stub(SelectQueryBuilder.prototype, method).callsFake(function (param: any) {
-        const repositoryName = this.__repositoryName ?? param.name;
+        const repositoryName = this.__repositoryName ?? param?.name;
         this.__repositoryName = repositoryName;
         return this;
       });
@@ -142,7 +156,16 @@ export class MockTypeORM {
 
     repositoryMethods.forEach((method) => {
       Sinon.stub(Repository.prototype, method).callsFake(async function (this: any) {
-        const repositoryName = this.target?.name ?? "";
+        let repositoryName: string;
+
+        if (this.target instanceof EntitySchema) {
+          repositoryName = this.target?.options?.name;
+        } else if (typeof this.target === "string") {
+          repositoryName = this.target;
+        } else {
+          repositoryName = this.target?.name ?? "";
+        }
+
         return mockMethod(self, method, repositoryName);
       });
     });
