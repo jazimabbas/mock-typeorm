@@ -6,6 +6,7 @@
 .gitignore
 rollup.config.js
 tsconfig.json
+tsconfig.package.json
 vitest.config.ts
 
 .DS_Store

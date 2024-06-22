@@ -15,6 +15,6 @@
       "rollup/parseAst": ["./node_modules/rollup/dist/parseAst"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "tests"],
   "exclude": ["node_modules"]
 }
