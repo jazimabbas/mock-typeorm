@@ -11,6 +11,7 @@ import { mockMethod } from "./helpers/mock-method";
 import { repositoryMethods } from "./constants/repository";
 import { entityManagerModifyMethods, entityManagerQueryMethods } from "./constants/entity-manager";
 import { dataSourceMethods } from "./constants/dataSource";
+import { createClass } from "./helpers/create-class";
 
 export class MockTypeORM {
   private _mocks: MockState;
@@ -104,34 +105,18 @@ export class MockTypeORM {
   }
 
   private mockCreateQueryBuilder() {
+    const self = this;
+
     Sinon.stub(DataSource.prototype, "createQueryBuilder").callsFake(function (
       this: any,
       param: any
     ): any {
-      let repositoryName: string;
-
-      if (param instanceof EntitySchema) {
-        repositoryName = param.options.name;
-      } else if (typeof param === "string") {
-        repositoryName = param;
-      } else {
-        repositoryName = param.name;
-      }
-
+      const repositoryName = self.getRepositoryName(param, param?.name);
       return mockCreateQueryBuilder.call(this, repositoryName);
     });
 
     Sinon.stub(Repository.prototype, "createQueryBuilder").callsFake(function (this: any) {
-      let repositoryName: string;
-
-      if (this.target instanceof EntitySchema) {
-        repositoryName = this.target.options.name;
-      } else if (typeof this.target === "string") {
-        repositoryName = this.target;
-      } else {
-        repositoryName = this.target.name;
-      }
-
+      const repositoryName = self.getRepositoryName(this?.target, this?.target?.name);
       return mockCreateQueryBuilder.call(this, repositoryName);
     });
   }
@@ -160,16 +145,7 @@ export class MockTypeORM {
 
     repositoryMethods.forEach((method) => {
       Sinon.stub(Repository.prototype, method).callsFake(async function (this: any) {
-        let repositoryName: string;
-
-        if (this.target instanceof EntitySchema) {
-          repositoryName = this.target?.options?.name;
-        } else if (typeof this.target === "string") {
-          repositoryName = this.target;
-        } else {
-          repositoryName = this.target?.name ?? "";
-        }
-
+        const repositoryName = self.getRepositoryName(this?.target, this?.target?.name ?? "");
         return mockMethod(self, method, repositoryName);
       });
     });
@@ -189,16 +165,7 @@ export class MockTypeORM {
 
     entityManagerQueryMethods.forEach((method: any) => {
       Sinon.stub(EntityManager.prototype, method).callsFake(async function (this: any, param: any) {
-        let repositoryName: string;
-
-        if (param instanceof EntitySchema) {
-          repositoryName = param.options.name;
-        } else if (typeof param === "string") {
-          repositoryName = param;
-        } else {
-          repositoryName = param.name;
-        }
-
+        const repositoryName = self.getRepositoryName(param, param?.name);
         return mockMethod(self, method, repositoryName);
       });
     });
@@ -242,20 +209,18 @@ export class MockTypeORM {
       }
     });
   }
-}
 
-function createClass(name: string) {
-  const DynamicClass = class {
-    constructor() {}
-  };
+  private getRepositoryName(repository: any, defaultRepositoryName: string) {
+    let repositoryName: string;
 
-  const handler = {
-    construct(target: any, args: any[]) {
-      const instance = Reflect.construct(target, args);
-      Object.defineProperty(instance.constructor, "name", { value: name, writable: false });
-      return instance;
-    },
-  };
+    if (repository instanceof EntitySchema) {
+      repositoryName = repository.options.name;
+    } else if (typeof repository === "string") {
+      repositoryName = repository;
+    } else {
+      repositoryName = defaultRepositoryName;
+    }
 
-  return new Proxy(DynamicClass, handler as any);
+    return repositoryName;
+  }
 }
