@@ -1,6 +1,10 @@
 import { MockTypeORM } from "../mock-typeorm";
 
-export function mockMethod(mockTypeORM: MockTypeORM, method: string, repositoryName: string) {
+export function mockMethod(
+  mockTypeORM: MockTypeORM,
+  method: string,
+  repositoryName: string,
+) {
   if (!repositoryName) return {};
 
   const repoMocks = mockTypeORM.mocks[repositoryName];

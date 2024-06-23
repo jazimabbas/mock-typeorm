@@ -1,7 +1,9 @@
 import { QueryRunner } from "typeorm";
 
 export type QueryRunnerMethods = keyof {
-  [K in keyof QueryRunner as QueryRunner[K] extends (...args: any[]) => any ? K : never]: K;
+  [K in keyof QueryRunner as QueryRunner[K] extends (...args: any[]) => any
+    ? K
+    : never]: K;
 };
 
 export const queryRunnerMethods: QueryRunnerMethods[] = [

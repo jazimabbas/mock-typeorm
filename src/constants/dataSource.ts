@@ -1,7 +1,9 @@
 import { DataSource } from "typeorm";
 
 export type DataSourceMethods = keyof {
-  [K in keyof DataSource as DataSource[K] extends (...args: any[]) => any ? K : never]: K;
+  [K in keyof DataSource as DataSource[K] extends (...args: any[]) => any
+    ? K
+    : never]: K;
 };
 
 export const dataSourceMethods: DataSourceMethods[] = [

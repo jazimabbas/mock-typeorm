@@ -1,7 +1,9 @@
 import { EntityManager } from "typeorm";
 
 type AllEntityManagerMethodObj = {
-  [K in keyof EntityManager as EntityManager[K] extends (...args: any[]) => any ? K : never]: K;
+  [K in keyof EntityManager as EntityManager[K] extends (...args: any[]) => any
+    ? K
+    : never]: K;
 };
 
 export type EntityManagerSetMockMethods = keyof Omit<

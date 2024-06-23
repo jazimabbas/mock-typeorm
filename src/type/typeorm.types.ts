@@ -1,7 +1,9 @@
 import { Repository, SelectQueryBuilder } from "typeorm";
 
 type SelectQueryBuilderMethodObj = {
-  [K in keyof SelectQueryBuilder<any> as SelectQueryBuilder<any>[K] extends (...args: any[]) => any
+  [K in keyof SelectQueryBuilder<any> as SelectQueryBuilder<any>[K] extends (
+    ...args: any[]
+  ) => any
     ? K
     : never]: SelectQueryBuilder<any>[K];
 };
@@ -21,7 +23,9 @@ export type SelfReferenceQueryBuilderMethods = Exclude<
   "createQueryBuilder"
 >;
 
-export type QueryBuilderReturnMethods = ExtractMethodNames<FilterMethods<Promise<any>>>;
+export type QueryBuilderReturnMethods = ExtractMethodNames<
+  FilterMethods<Promise<any>>
+>;
 
 type AllRepositoryMethods = {
   [K in keyof Repository<any>]: K;

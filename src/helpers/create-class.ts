@@ -6,7 +6,10 @@ export function createClass(name: string) {
   const handler = {
     construct(target: any, args: any[]) {
       const instance = Reflect.construct(target, args);
-      Object.defineProperty(instance.constructor, "name", { value: name, writable: false });
+      Object.defineProperty(instance.constructor, "name", {
+        value: name,
+        writable: false,
+      });
       return instance;
     },
   };

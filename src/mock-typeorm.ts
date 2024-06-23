@@ -1,7 +1,18 @@
 import * as Sinon from "sinon";
-import { DataSource, EntityManager, EntitySchema, Repository, SelectQueryBuilder } from "typeorm";
+import {
+  DataSource,
+  EntityManager,
+  EntitySchema,
+  Repository,
+  SelectQueryBuilder,
+} from "typeorm";
 import { mockCreateQueryRunner } from "./helpers/mock-create-query-runner";
-import { Constructor, MockHistory, MockState, SetMock } from "./type/mock-typeorm.types";
+import {
+  Constructor,
+  MockHistory,
+  MockState,
+  SetMock,
+} from "./type/mock-typeorm.types";
 import { mockCreateQueryBuilder } from "./helpers/mock-create-query-builder";
 import {
   queryBuilderReturnMethods,
@@ -9,7 +20,10 @@ import {
 } from "./constants/query-builder";
 import { mockMethod } from "./helpers/mock-method";
 import { repositoryMethods } from "./constants/repository";
-import { entityManagerModifyMethods, entityManagerQueryMethods } from "./constants/entity-manager";
+import {
+  entityManagerModifyMethods,
+  entityManagerQueryMethods,
+} from "./constants/entity-manager";
 import { dataSourceMethods } from "./constants/dataSource";
 import { createClass } from "./helpers/create-class";
 
@@ -46,7 +60,8 @@ export class MockTypeORM {
 
   onMock(repository: string | Constructor<any>): SetMock {
     const self = this;
-    const repositoryName = typeof repository === "string" ? repository : repository.name;
+    const repositoryName =
+      typeof repository === "string" ? repository : repository.name;
 
     return {
       toReturn(mockData: any, method = "find") {
@@ -73,7 +88,8 @@ export class MockTypeORM {
       reset(method) {
         if (method) {
           if (self.mocks[repositoryName]) delete self.mocks[repositoryName][method];
-          if (self.mockHistory[repositoryName]) delete self.mockHistory[repositoryName][method];
+          if (self.mockHistory[repositoryName])
+            delete self.mockHistory[repositoryName][method];
           return;
         }
 
@@ -99,7 +115,9 @@ export class MockTypeORM {
   }
 
   private mockCreateQueryRunner() {
-    Sinon.stub(DataSource.prototype, "createQueryRunner").callsFake(function (this: any) {
+    Sinon.stub(DataSource.prototype, "createQueryRunner").callsFake(function (
+      this: any,
+    ) {
       return mockCreateQueryRunner.call(this);
     });
   }
@@ -109,14 +127,19 @@ export class MockTypeORM {
 
     Sinon.stub(DataSource.prototype, "createQueryBuilder").callsFake(function (
       this: any,
-      param: any
+      param: any,
     ): any {
       const repositoryName = self.getRepositoryName(param, param?.name);
       return mockCreateQueryBuilder.call(this, repositoryName);
     });
 
-    Sinon.stub(Repository.prototype, "createQueryBuilder").callsFake(function (this: any) {
-      const repositoryName = self.getRepositoryName(this?.target, this?.target?.name);
+    Sinon.stub(Repository.prototype, "createQueryBuilder").callsFake(function (
+      this: any,
+    ) {
+      const repositoryName = self.getRepositoryName(
+        this?.target,
+        this?.target?.name,
+      );
       return mockCreateQueryBuilder.call(this, repositoryName);
     });
   }
@@ -125,7 +148,9 @@ export class MockTypeORM {
     const self = this;
 
     selfReferenceQueryBuilderMethods.forEach((method) => {
-      Sinon.stub(SelectQueryBuilder.prototype, method).callsFake(function (param: any) {
+      Sinon.stub(SelectQueryBuilder.prototype, method).callsFake(function (
+        param: any,
+      ) {
         const repositoryName = this.__repositoryName ?? param?.name;
         this.__repositoryName = repositoryName;
         return this;
@@ -145,7 +170,10 @@ export class MockTypeORM {
 
     repositoryMethods.forEach((method) => {
       Sinon.stub(Repository.prototype, method).callsFake(async function (this: any) {
-        const repositoryName = self.getRepositoryName(this?.target, this?.target?.name ?? "");
+        const repositoryName = self.getRepositoryName(
+          this?.target,
+          this?.target?.name ?? "",
+        );
         return mockMethod(self, method, repositoryName);
       });
     });
@@ -164,14 +192,19 @@ export class MockTypeORM {
     };
 
     entityManagerQueryMethods.forEach((method: any) => {
-      Sinon.stub(EntityManager.prototype, method).callsFake(async function (this: any, param: any) {
+      Sinon.stub(EntityManager.prototype, method).callsFake(async function (
+        this: any,
+        param: any,
+      ) {
         const repositoryName = self.getRepositoryName(param, param?.name);
         return mockMethod(self, method, repositoryName);
       });
     });
 
     entityManagerModifyMethods.forEach((method) => {
-      Sinon.stub(EntityManager.prototype, method).callsFake(async function (param: any) {
+      Sinon.stub(EntityManager.prototype, method).callsFake(async function (
+        param: any,
+      ) {
         const repositoryName = getRepositoryName(param);
         if (!repositoryName) return {};
 
@@ -181,7 +214,7 @@ export class MockTypeORM {
 
     Sinon.stub(EntityManager.prototype, "create").callsFake(function (
       Repository: any,
-      params: any
+      params: any,
     ) {
       if (Repository instanceof EntitySchema) {
         Repository = createClass(Repository.options.name);
@@ -198,7 +231,7 @@ export class MockTypeORM {
 
     Sinon.stub(EntityManager.prototype, "transaction").callsFake(async function (
       isolationLevelOrCallback: any,
-      callback: any
+      callback: any,
     ) {
       const manager = this.connection.manager;
 

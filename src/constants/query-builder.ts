@@ -1,4 +1,7 @@
-import { QueryBuilderReturnMethods, SelfReferenceQueryBuilderMethods } from "../type/typeorm.types";
+import {
+  QueryBuilderReturnMethods,
+  SelfReferenceQueryBuilderMethods,
+} from "../type/typeorm.types";
 
 export const selfReferenceQueryBuilderMethods: SelfReferenceQueryBuilderMethods[] = [
   "addCommonTableExpression",

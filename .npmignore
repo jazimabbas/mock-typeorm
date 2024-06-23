@@ -9,5 +9,9 @@ rollup.config.js
 tsconfig.json
 tsconfig.package.json
 vitest.config.ts
+.prettierrc.json
+LICENSE
+.eslintrc.json
+.eslintignore
 
 .DS_Store
