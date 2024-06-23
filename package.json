@@ -1,7 +1,7 @@
 {
   "name": "mock-typeorm",
   "version": "1.0.0",
-  "description": "",
+  "description": "Never hit the database again while testing",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/types/index.d.ts",
@@ -22,20 +22,17 @@
   "author": "Jazim Abbas",
   "license": "MIT",
   "peerDependencies": {
+    "sinon": ">=18.x",
     "typeorm": ">=0.1.x"
   },
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.6",
     "@types/node": "^20.14.2",
-    "@types/sinon": "^17.0.3",
     "@vitest/ui": "^1.6.0",
     "rimraf": "^5.0.7",
     "rollup": "^4.18.0",
     "rollup-plugin-swc": "^0.2.1",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
-  },
-  "dependencies": {
-    "sinon": "^18.0.0"
   }
 }
