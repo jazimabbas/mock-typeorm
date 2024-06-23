@@ -19,6 +19,10 @@ export default defineConfig({
   ],
   test: {
     globals: true,
+    coverage: {
+      provider: "istanbul",
+      reporter: ["text", "json", "html"],
+    },
     includeSource: ["src/**/*.{js,ts}", "tests/**/*.{js,ts}"],
     exclude: [...configDefaults.exclude, "**/node_modules/**", "**/dist/**"],
   },

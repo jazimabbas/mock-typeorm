@@ -2,6 +2,7 @@
 
 /src
 /tests
+/coverage
 .github
 .gitignore
 rollup.config.js

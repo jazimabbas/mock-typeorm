@@ -1,4 +1,4 @@
-# Mock TypeORM
+# Mock TypeORM [![Run Test and Lint](https://github.com/jazimabbas/mock-typeorm/actions/workflows/nodejs.yml/badge.svg?branch=master)](https://github.com/jazimabbas/mock-typeorm/actions/workflows/nodejs.yml)
 
 > Never hit the database again while testing.
 
