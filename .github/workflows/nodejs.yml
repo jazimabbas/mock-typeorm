@@ -1,7 +1,17 @@
 name: Mock TypeORM
 
+on:
+  push:
+    branches:
+      - master
+      - dev
+      - "feature/**"
+  pull_request:
+    branches:
+      - "**"
+
 jobs:
-  lint-and-test:
+  test:
     runs-on: ubuntu-latest
 
     steps:
