@@ -92,7 +92,7 @@ describe("EntityManager", () => {
         const role = await dataSource.manager[method](Role, {});
 
         expect(role).toEqual(["role"]);
-      }
+      },
     );
   });
 });

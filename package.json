@@ -11,16 +11,27 @@
       "import": "./dist/esm/index.js"
     }
   },
+  "homepage": "https://mock-typeorm-docs.vercel.app",
+  "repository": {
+    "url": "https://github.com/jazimabbas/mock-typeorm"
+  },
   "scripts": {
     "build:types": "tsc -p tsconfig.package.json --emitDeclarationOnly",
     "build": "rimraf ./dist && npm run build:types && rollup -c",
-    "publish": "npm run build",
+    "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage.enabled=true",
     "lint": "eslint 'src/**/*.{js,ts}'"
   },
-  "keywords": [],
+  "keywords": [
+    "typeorm",
+    "mocking",
+    "mock typeorm",
+    "mock-typeorm",
+    "typescript",
+    "nodejs"
+  ],
   "author": "Jazim Abbas",
   "license": "MIT",
   "peerDependencies": {
@@ -37,6 +48,7 @@
     "eslint": "^8.51.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "mysql2": "^3.10.1",
     "prettier": "^3.3.2",
     "rimraf": "^5.0.7",
     "rollup": "^4.18.0",
