@@ -19,7 +19,6 @@ export function mockMethod(
   const mockData =
     mockTypeORM.mocks[repositoryName][method][mockDataExtractedFrom] ??
     mockTypeORM.mocks[repositoryName][method][0];
-  if (!mockData) return {};
 
   if (mockData instanceof Error) throw mockData;
   return mockData;

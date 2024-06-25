@@ -1,13 +1,17 @@
 import * as Sinon from "sinon";
 import { queryRunnerMethods } from "../constants/query-runner";
+import { MockTypeORM } from "../mock-typeorm";
 
-export function mockCreateQueryRunner(this: any) {
+export function mockCreateQueryRunner(this: any, mockTypeORM: MockTypeORM) {
   const queryRunner: any = {};
 
-  queryRunnerMethods.forEach((method) => {
-    (queryRunner as any)[method] = Sinon.stub();
-  });
-  queryRunner.manager = this.manager;
+  if (!mockTypeORM.__internal?.queryRunner) {
+    queryRunnerMethods.forEach((method) => {
+      (queryRunner as any)[method] = Sinon.stub();
+    });
+    queryRunner.manager = this.manager;
+    mockTypeORM.__internal.queryRunner = queryRunner;
+  }
 
-  return queryRunner as any;
+  return mockTypeORM.__internal.queryRunner as any;
 }

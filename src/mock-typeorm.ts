@@ -28,27 +28,14 @@ import { dataSourceMethods } from "./constants/dataSource";
 import { createClass, getDefinedMethods } from "./helpers/general";
 
 export class MockTypeORM {
-  private _mocks: MockState;
-  private _mockHistory: MockHistory;
-
-  public get mocks(): MockState {
-    return this._mocks;
-  }
-
-  public set mocks(value: MockState) {
-    this._mocks = value;
-  }
-
-  public get mockHistory(): MockHistory {
-    return this._mockHistory;
-  }
-  public set mockHistory(value: MockHistory) {
-    this._mockHistory = value;
-  }
+  mocks: MockState;
+  mockHistory: MockHistory;
+  __internal: any;
 
   constructor() {
     this.mocks = {};
     this.mockHistory = {};
+    this.__internal = {};
 
     this.mockDataSouceMethods();
     this.mockCreateQueryRunner();
@@ -102,6 +89,7 @@ export class MockTypeORM {
   resetAll() {
     this.mocks = {};
     this.mockHistory = {};
+    this.__internal = {};
   }
 
   restore() {
@@ -114,17 +102,19 @@ export class MockTypeORM {
       dataSourceMethods,
     );
 
-    filteredDataSourceMethods.forEach((method) => {
+    filteredDataSourceMethods.forEach((method: any) => {
       Sinon.stub(DataSource.prototype, method);
     });
   }
 
   private mockCreateQueryRunner() {
+    const self = this;
+
     if (DataSource.prototype.createQueryRunner) {
       Sinon.stub(DataSource.prototype, "createQueryRunner").callsFake(function (
         this: any,
       ) {
-        return mockCreateQueryRunner.call(this);
+        return mockCreateQueryRunner.call(this, self);
       });
     }
   }
@@ -167,7 +157,7 @@ export class MockTypeORM {
       queryBuilderReturnMethods,
     );
 
-    filteredSelfReferenceQueryBuilderMethods.forEach((method) => {
+    filteredSelfReferenceQueryBuilderMethods.forEach((method: any) => {
       Sinon.stub(SelectQueryBuilder.prototype, method).callsFake(function (
         param: any,
       ) {
@@ -177,7 +167,7 @@ export class MockTypeORM {
       });
     });
 
-    filteredQueryBuilderReturnMethods.forEach((method) => {
+    filteredQueryBuilderReturnMethods.forEach((method: any) => {
       Sinon.stub(SelectQueryBuilder.prototype, method).callsFake(async function () {
         const repositoryName = this.__repositoryName;
         return mockMethod(self, method, repositoryName);
@@ -193,7 +183,7 @@ export class MockTypeORM {
       repositoryMethods,
     );
 
-    filteredRepositoryMethods.forEach((method) => {
+    filteredRepositoryMethods.forEach((method: any) => {
       Sinon.stub(Repository.prototype, method).callsFake(async function (this: any) {
         const repositoryName = self.getRepositoryName(
           this?.target,
@@ -235,7 +225,7 @@ export class MockTypeORM {
       });
     });
 
-    filteredEntityManagerSavedMethods.forEach((method) => {
+    filteredEntityManagerSavedMethods.forEach((method: any) => {
       Sinon.stub(EntityManager.prototype, method).callsFake(async function (
         param: any,
       ) {

@@ -1,7 +1,9 @@
+import { SinonStub } from "sinon";
 import { describe, expect, it, afterEach, afterAll, beforeAll } from "vitest";
 import { MockTypeORM } from "../src";
 import { dataSource, Role } from "./utils/mock";
 import { getDefinedMethods } from "../src/helpers/general";
+import { transaction } from "./utils/helpers";
 
 describe("General", () => {
   let typeorm: MockTypeORM;
@@ -41,6 +43,28 @@ describe("General", () => {
 
     expect(role).toEqual({});
     expect(roles).toEqual({});
+  });
+
+  it("should return null if pass null as mock data to repository method", async () => {
+    typeorm.onMock(Role).toReturn(null, "findOne");
+
+    const role = await dataSource.getRepository(Role).findOne({});
+
+    expect(role).toEqual(null);
+  });
+
+  it("should commit transaction and return roles", async () => {
+    const roles = [{ id: 1, name: "Admin" }];
+    typeorm.onMock(Role).toReturn(roles, "find");
+    const queryRunner = dataSource.createQueryRunner();
+
+    const result = await transaction();
+
+    expect(result).toEqual(roles);
+    expect((queryRunner.connect as SinonStub).callCount).toEqual(1);
+    expect((queryRunner.startTransaction as SinonStub).callCount).toEqual(1);
+    expect((queryRunner.commitTransaction as SinonStub).callCount).toEqual(1);
+    expect((queryRunner.release as SinonStub).callCount).toEqual(1);
   });
 
   describe("getDefinedMethods()", () => {
