@@ -61,7 +61,6 @@ export class MockTypeORM {
           const totalMockItemsFoundInMethod = Object.keys(mockMethod).length;
           mockMethod[totalMockItemsFoundInMethod] = mockData;
         } else {
-          //self.mocks[repositoryName] = { [method]: { 0: mockData } };
           self.mocks[repositoryName][method] = { 0: mockData };
 
           // initialize mock history with empty state
@@ -69,8 +68,7 @@ export class MockTypeORM {
             self.mockHistory = { ...self.mockHistory, [repositoryName]: {} };
           }
 
-          // is this the same issue as above, overwriting the existing history when a new method is passed?
-          self.mockHistory[repositoryName] = { [method]: 0 };
+          self.mockHistory[repositoryName][method] = 0;
         }
 
         return this;
