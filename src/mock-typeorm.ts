@@ -61,13 +61,14 @@ export class MockTypeORM {
           const totalMockItemsFoundInMethod = Object.keys(mockMethod).length;
           mockMethod[totalMockItemsFoundInMethod] = mockData;
         } else {
-          self.mocks[repositoryName] = { [method]: { 0: mockData } };
+          self.mocks[repositoryName][method] = { 0: mockData };
 
           // initialize mock history with empty state
           if (!self.mockHistory[repositoryName]) {
             self.mockHistory = { ...self.mockHistory, [repositoryName]: {} };
           }
-          self.mockHistory[repositoryName] = { [method]: 0 };
+
+          self.mockHistory[repositoryName][method] = 0;
         }
 
         return this;
