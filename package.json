@@ -1,6 +1,6 @@
 {
   "name": "mock-typeorm",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Never hit the database again while testing",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
