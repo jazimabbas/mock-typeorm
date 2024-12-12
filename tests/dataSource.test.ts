@@ -84,6 +84,28 @@ describe("DataSource", () => {
       expect(roles).toEqual(mockRoles);
     });
 
+    it("should pass the returned value of an transaction", async () => {
+      const mockRoles = ["role"];
+      const typeorm = new MockTypeORM();
+      typeorm.onMock(Role).toReturn(mockRoles, "find");
+
+      const roles= await dataSource.transaction(async (manager) => {
+        return await manager.find(Role, {});
+      });
+
+      expect(roles).toEqual(mockRoles);
+    });
+
+    it("should propagate exceptions", async () => {
+      new MockTypeORM();
+
+      const promise= dataSource.transaction(async (manager) => {
+        throw Error("bad")
+      });
+
+      await expect(promise).rejects.toThrow("bad")
+    });
+
     it("should run method inside transaction with isolation level passed in", async () => {
       const mockRoles = ["role1"];
       const typeorm = new MockTypeORM();
@@ -95,6 +117,28 @@ describe("DataSource", () => {
       });
 
       expect(roles).toEqual(mockRoles);
+    });
+
+    it("should run method inside transaction with isolation level passed in and pass the value", async () => {
+      const mockRoles = ["role1"];
+      const typeorm = new MockTypeORM();
+      typeorm.onMock(Role).toReturn(mockRoles, "find");
+
+      const roles = await dataSource.manager.transaction("READ COMMITTED", async (manager) => {
+        return await manager.find(Role, {});
+      });
+
+      expect(roles).toEqual(mockRoles);
+    });
+
+    it("should propagate exception inside transaction with isolation level", async () => {
+      new MockTypeORM();
+
+      const promise = dataSource.manager.transaction("READ COMMITTED", async () => {
+        throw new Error("very bad");
+      });
+
+      await expect(promise).rejects.toThrow("very bad");
     });
 
     describe("callback", () => {

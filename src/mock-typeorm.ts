@@ -264,9 +264,9 @@ export class MockTypeORM {
         const manager = this.connection.manager;
 
         if (typeof isolationLevelOrCallback === "string") {
-          callback(manager);
+          return callback(manager);
         } else {
-          isolationLevelOrCallback(manager);
+          return isolationLevelOrCallback(manager);
         }
       });
     }
