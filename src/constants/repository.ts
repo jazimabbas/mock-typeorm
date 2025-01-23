@@ -25,6 +25,7 @@ export const repositoryMethods: RepositoryMethods[] = [
   "increment",
   "insert",
   "maximum",
+  "merge",
   "minimum",
   "preload",
   "query",
