@@ -1,11 +1,13 @@
-const typescript = require("@rollup/plugin-typescript");
+import typescript from "@rollup/plugin-typescript";
+import { defineConfig } from "rollup";
 
+/** @type {import('@rollup/plugin-typescript').RollupTypescriptOptions} */
 const typescriptOptions = {
   exclude: ["tests/**/*"],
-  compilerOptions: { declaration: false },
+  compilerOptions: { declaration: false, declarationDir: undefined, outDir: undefined },
 };
 
-const data = [
+export default defineConfig([
   {
     external: ["typeorm", "sinon"],
     input: "src/index.ts",
@@ -18,6 +20,4 @@ const data = [
     output: { file: "dist/cjs/index.js", format: "cjs" },
     plugins: [typescript(typescriptOptions)],
   },
-];
-
-module.exports = data;
+]);
