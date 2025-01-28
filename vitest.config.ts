@@ -1,20 +1,22 @@
-import swc from "rollup-plugin-swc";
+import swc from "@rollup/plugin-swc";
 import { defineConfig, configDefaults } from "vitest/config";
 
 export default defineConfig({
   plugins: [
     swc({
-      jsc: {
-        parser: {
-          syntax: "typescript",
-          dynamicImport: true,
-          decorators: true,
+      swc: {
+        jsc: {
+          parser: {
+            syntax: "typescript",
+            dynamicImport: true,
+            decorators: true,
+          },
+          target: "es2021",
+          transform: {
+            decoratorMetadata: true,
+          },
         },
-        target: "es2021",
-        transform: {
-          decoratorMetadata: true,
-        },
-      },
+      }
     }),
   ],
   test: {
@@ -27,3 +29,4 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, "**/node_modules/**", "**/dist/**"],
   },
 });
+
