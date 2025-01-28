@@ -15,6 +15,7 @@
   "homepage": "https://mock-typeorm-docs.vercel.app",
   "repository": {
     "url": "https://github.com/jazimabbas/mock-typeorm"
+  },
   "engines": {
     "node": "22"
   },
