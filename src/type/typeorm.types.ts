@@ -27,6 +27,8 @@ export type QueryBuilderReturnMethods = ExtractMethodNames<
   FilterMethods<Promise<any>>
 >;
 
+export type QueryBuilderMethods = ExtractMethodNames<FilterMethods<any>>;
+
 type AllRepositoryMethods = {
   [K in keyof Repository<any>]: K;
 }[keyof Repository<any>];

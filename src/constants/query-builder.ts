@@ -1,4 +1,5 @@
 import {
+  QueryBuilderMethods,
   QueryBuilderReturnMethods,
   SelfReferenceQueryBuilderMethods,
 } from "../type/typeorm.types";
@@ -65,7 +66,7 @@ export const selfReferenceQueryBuilderMethods: SelfReferenceQueryBuilderMethods[
   "withDeleted",
 ];
 
-export const queryBuilderReturnMethods: QueryBuilderReturnMethods[] = [
+export const queryResultsMethods: QueryBuilderReturnMethods[] = [
   "execute",
   "getCount",
   "getExists",
@@ -73,8 +74,15 @@ export const queryBuilderReturnMethods: QueryBuilderReturnMethods[] = [
   "getManyAndCount",
   "getOne",
   "getOneOrFail",
-  "getRawAndEntities",
   "getRawMany",
   "getRawOne",
   "stream",
+];
+
+export const synchronousQueryResultsMethods: QueryBuilderMethods[] = [
+  "getParameters",
+  "getQuery",
+  "getQueryAndParameters",
+  "getRawAndEntities",
+  "getSql",
 ];

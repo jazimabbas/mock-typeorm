@@ -1,5 +1,6 @@
 import { EntityManagerSetMockMethods } from "../constants/entity-manager";
 import {
+  QueryBuilderMethods,
   QueryBuilderReturnMethods,
   RepositoryMethods,
   SelfReferenceQueryBuilderMethods,
@@ -19,7 +20,8 @@ export type Methods =
   | EntityManagerSetMockMethods
   | QueryBuilderReturnMethods
   | SelfReferenceQueryBuilderMethods
-  | RepositoryMethods;
+  | RepositoryMethods
+  | QueryBuilderMethods;
 
 export interface Constructor<T> {
   new (...args: any[]): T;
