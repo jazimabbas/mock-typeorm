@@ -2,7 +2,7 @@ import { SinonStub } from "sinon";
 import { describe, expect, it, afterEach, afterAll, beforeAll } from "vitest";
 import { MockTypeORM } from "../src";
 import { dataSource, Role } from "./utils/mock";
-import { getDefinedMethods } from "../src/helpers/general";
+import { retrieveAvailableMethods } from "../src/helpers/general";
 import { transaction } from "./utils/helpers";
 
 describe("General", () => {
@@ -75,7 +75,7 @@ describe("General", () => {
         property: 123,
       };
       const methods = ["method1", "method2", "method3"];
-      const result = getDefinedMethods(obj, methods);
+      const result = retrieveAvailableMethods(obj, methods);
       expect(result).toEqual(["method1", "method2"]);
     });
 
@@ -85,7 +85,7 @@ describe("General", () => {
         property2: "value",
       };
       const methods = ["method1", "method2"];
-      const result = getDefinedMethods(obj, methods);
+      const result = retrieveAvailableMethods(obj, methods);
       expect(result).toEqual([]);
     });
 
@@ -95,14 +95,14 @@ describe("General", () => {
         method2: () => {},
       };
       const methods = [];
-      const result = getDefinedMethods(obj, methods);
+      const result = retrieveAvailableMethods(obj, methods);
       expect(result).toEqual([]);
     });
 
     it("should handle objects with no properties gracefully", () => {
       const obj = {};
       const methods = ["method1", "method2"];
-      const result = getDefinedMethods(obj, methods);
+      const result = retrieveAvailableMethods(obj, methods);
       expect(result).toEqual([]);
     });
 
@@ -113,7 +113,7 @@ describe("General", () => {
         method3: () => {},
       };
       const methods = ["method1", "method2", "method3"];
-      const result = getDefinedMethods(obj, methods);
+      const result = retrieveAvailableMethods(obj, methods);
       expect(result).toEqual(["method1", "method2", "method3"]);
     });
   });

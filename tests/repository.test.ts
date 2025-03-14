@@ -20,7 +20,7 @@ describe("Repository", () => {
         const result = await roleRepository[method as any]();
 
         expect(result).toEqual(mockData);
-      }
+      },
     );
   });
 
@@ -43,6 +43,35 @@ describe("Repository", () => {
     const roleRepository = dataSource.getRepository(Role);
 
     await expect(roleRepository.find({})).rejects.toThrowError(/failed/i);
+  });
+
+  describe("create() without awaiting", () => {
+    it("should create a role with the correct data without awaiting", () => {
+      const typeorm = new MockTypeORM();
+      const mockRole = { name: "role", isAdmin: true };
+      typeorm.onMock(Role).toReturn(mockRole, "create");
+
+      const roleRepository = dataSource.getRepository(Role);
+      const role = roleRepository.create({ name: "role1" });
+
+      expect(role).toEqual(mockRole);
+    });
+
+    it("should create and save a role with the correct data", async () => {
+      const typeorm = new MockTypeORM();
+      const mockRole = { name: "role", isAdmin: true };
+      typeorm
+        .onMock(Role)
+        .toReturn(mockRole, "create")
+        .toReturn({ id: "1", ...mockRole }, "save");
+
+      const roleRepository = dataSource.getRepository(Role);
+      const role = roleRepository.create({ name: "role1" });
+      const savedRole = await roleRepository.save(role);
+
+      expect(role).toEqual(mockRole);
+      expect(savedRole).toEqual({ id: "1", ...mockRole });
+    });
   });
 
   describe("EntitySchema", () => {
