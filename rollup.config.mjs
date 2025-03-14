@@ -4,7 +4,11 @@ import { defineConfig } from "rollup";
 /** @type {import('@rollup/plugin-typescript').RollupTypescriptOptions} */
 const typescriptOptions = {
   exclude: ["tests/**/*"],
-  compilerOptions: { declaration: false, declarationDir: undefined, outDir: undefined },
+  compilerOptions: {
+    declaration: false,
+    declarationDir: undefined,
+    outDir: undefined,
+  },
 };
 
 export default defineConfig([

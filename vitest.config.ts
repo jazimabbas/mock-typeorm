@@ -16,7 +16,7 @@ export default defineConfig({
             decoratorMetadata: true,
           },
         },
-      }
+      },
     }),
   ],
   test: {
@@ -29,4 +29,3 @@ export default defineConfig({
     exclude: [...configDefaults.exclude, "**/node_modules/**", "**/dist/**"],
   },
 });
-
