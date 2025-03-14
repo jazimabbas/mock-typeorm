@@ -24,16 +24,37 @@ describe("Repository", () => {
     );
   });
 
-  it("should return different data when we call same methods in one function", async () => {
-    const typeorm = new MockTypeORM();
-    typeorm.onMock(Role).toReturn(["role1"], "find").toReturn(["role2"], "find");
+  describe("calling the same repository method multiple times in a same function", () => {
+    it("should return different data when we call same methods in one function", async () => {
+      const typeorm = new MockTypeORM();
+      typeorm.onMock(Role).toReturn(["role1"], "find").toReturn(["role2"], "find");
 
-    const roleRepository = dataSource.getRepository(Role);
-    const roles = await roleRepository.find();
-    const newRoles = await roleRepository.find();
+      const roleRepository = dataSource.getRepository(Role);
+      const roles = await roleRepository.find();
+      const newRoles = await roleRepository.find();
 
-    expect(roles).toEqual(["role1"]);
-    expect(newRoles).toEqual(["role2"]);
+      expect(roles).toEqual(["role1"]);
+      expect(newRoles).toEqual(["role2"]);
+    });
+
+    // ISSUE: https://github.com/jazimabbas/mock-typeorm/issues/4
+    it("should return null if we mock the function by providing the null value", async () => {
+      const typeorm = new MockTypeORM();
+      typeorm
+        .onMock(Role)
+        .toReturn(null, "findOne")
+        .toReturn({ id: "1" }, "findOne")
+        .toReturn(null, "findOne");
+
+      const roleRepository = dataSource.getRepository(Role);
+      const role1 = await roleRepository.findOne({});
+      const role2 = await roleRepository.findOne({});
+      const role3 = await roleRepository.findOne({});
+
+      expect(role1).toBeNull();
+      expect(role2).toEqual({ id: "1" });
+      expect(role3).toBeNull();
+    });
   });
 
   it("should throw an error if mock method throws an error", async () => {
