@@ -25,7 +25,7 @@ import {
   entityManagerQueryMethods,
 } from "./constants/entity-manager";
 import { dataSourceMethods } from "./constants/dataSource";
-import { createClass, getDefinedMethods } from "./helpers/general";
+import { createClass, retrieveAvailableMethods } from "./helpers/general";
 
 export class MockTypeORM {
   mocks: MockState;
@@ -98,7 +98,7 @@ export class MockTypeORM {
   }
 
   private mockDataSouceMethods() {
-    const filteredDataSourceMethods = getDefinedMethods(
+    const filteredDataSourceMethods = retrieveAvailableMethods(
       DataSource.prototype,
       dataSourceMethods,
     );
@@ -149,11 +149,11 @@ export class MockTypeORM {
   private mockSelectQueryBuilderMethods() {
     const self = this;
 
-    const filteredSelfReferenceQueryBuilderMethods = getDefinedMethods(
+    const filteredSelfReferenceQueryBuilderMethods = retrieveAvailableMethods(
       SelectQueryBuilder.prototype,
       selfReferenceQueryBuilderMethods,
     );
-    const filteredQueryBuilderReturnMethods = getDefinedMethods(
+    const filteredQueryBuilderReturnMethods = retrieveAvailableMethods(
       SelectQueryBuilder.prototype,
       queryBuilderReturnMethods,
     );
@@ -179,18 +179,28 @@ export class MockTypeORM {
   private mockRepositoryMethods() {
     const self = this;
 
-    const filteredRepositoryMethods = getDefinedMethods(
+    const filteredRepositoryMethods = retrieveAvailableMethods(
       Repository.prototype,
       repositoryMethods,
     );
 
-    filteredRepositoryMethods.forEach((method: any) => {
-      Sinon.stub(Repository.prototype, method).callsFake(async function (this: any) {
+    filteredRepositoryMethods.forEach((method) => {
+      Sinon.stub(Repository.prototype, method as any).callsFake(function (
+        this: any,
+      ) {
         const repositoryName = self.getRepositoryName(
           this?.target,
           this?.target?.name ?? "",
         );
-        return mockMethod(self, method, repositoryName);
+
+        // Because in TypeORM, create method is a non-async method
+        if (method === "create") {
+          return mockMethod(self, method, repositoryName);
+        }
+
+        return new Promise((resolve) => {
+          resolve(mockMethod(self, method, repositoryName));
+        });
       });
     });
   }
@@ -198,11 +208,11 @@ export class MockTypeORM {
   private mockEntityManagerMethods() {
     const self = this;
 
-    const filteredEntityManagerQueryMethods = getDefinedMethods(
+    const filteredEntityManagerQueryMethods = retrieveAvailableMethods(
       EntityManager.prototype,
       entityManagerQueryMethods,
     );
-    const filteredEntityManagerSavedMethods = getDefinedMethods(
+    const filteredEntityManagerSavedMethods = retrieveAvailableMethods(
       EntityManager.prototype,
       entityManagerModifyMethods,
     );

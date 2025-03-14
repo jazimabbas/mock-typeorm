@@ -19,6 +19,6 @@ export function createClass(name: string) {
 
 type Obj = { [x: string]: any };
 
-export function getDefinedMethods(object: Obj, methods: string[]) {
+export function retrieveAvailableMethods(object: Obj, methods: string[]) {
   return methods.filter((method) => !!object[method]);
 }
