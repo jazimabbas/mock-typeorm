@@ -2,6 +2,7 @@ import Sinon, { SinonStub } from "sinon";
 import { describe, expect, it, afterEach } from "vitest";
 import { MockTypeORM } from "../src";
 import { dataSource, Role, UserEntitySchema } from "./utils/mock";
+import { synchronousQueryResultsMethods } from "../src/constants/query-builder";
 
 describe("QueryBuilder", () => {
   afterEach(() => {
@@ -68,15 +69,34 @@ describe("QueryBuilder", () => {
 
         const { queryBuilder } = setup();
 
-        await expect(queryBuilder.where("user.id = 1").select().getOne()).rejects.toThrowError(
-          /failed/i
-        );
+        await expect(
+          queryBuilder.where("user.id = 1").select().getOne(),
+        ).rejects.toThrowError(/failed/i);
         expect((queryBuilder.where as SinonStub).callCount).toEqual(1);
         expect((queryBuilder.select as SinonStub).callCount).toEqual(1);
         expect((queryBuilder.getOne as SinonStub).callCount).toEqual(1);
         expect((queryBuilder.getMany as SinonStub).callCount).toEqual(0); // just to test if we call this method or not
       });
     });
+  });
+
+  describe("synchrounous queryBuilder result methods e.g. getSql, getQuery etc..", () => {
+    it.each(synchronousQueryResultsMethods)(
+      "should run %s() method",
+      async (method) => {
+        const typeorm = new MockTypeORM();
+        typeorm.onMock(Role).toReturn("role", method);
+
+        const queryBuilder = dataSource.createQueryBuilder(Role, "role");
+        const role = queryBuilder.where("user.id = 1").select()[method as any](); // this will translate to getSql() or getQuery() etc.. e.g.  queryBuilder.where("user.id = 1").select().getSql();
+
+        expect(role).toEqual("role");
+        expect((queryBuilder.where as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.select as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder[method as any] as SinonStub).callCount).toEqual(1);
+        expect((queryBuilder.getMany as SinonStub).callCount).toEqual(0); // just to test if we call this method or not
+      },
+    );
   });
 
   describe("EntitySchema", () => {

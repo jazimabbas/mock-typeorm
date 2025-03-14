@@ -1,0 +1,8 @@
+{
+  "github.copilot.chat.commitMessageGeneration.instructions": [
+    {
+      "text": "Use conventional commit message format. Add a short description of the change, followed by a blank line and a longer description. Use the imperative mood in the short description and include a reference to the issue number. Add emojis to make the commit message more expressive.",
+      "type": "markdown"
+    }
+  ]
+}

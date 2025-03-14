@@ -15,8 +15,9 @@ import {
 } from "./type/mock-typeorm.types";
 import { mockCreateQueryBuilder } from "./helpers/mock-create-query-builder";
 import {
-  queryBuilderReturnMethods,
+  queryResultsMethods,
   selfReferenceQueryBuilderMethods,
+  synchronousQueryResultsMethods,
 } from "./constants/query-builder";
 import { mockMethod } from "./helpers/mock-method";
 import { repositoryMethods } from "./constants/repository";
@@ -155,7 +156,11 @@ export class MockTypeORM {
     );
     const filteredQueryBuilderReturnMethods = retrieveAvailableMethods(
       SelectQueryBuilder.prototype,
-      queryBuilderReturnMethods,
+      queryResultsMethods,
+    );
+    const syncQueryBuilderReturnMethods = retrieveAvailableMethods(
+      SelectQueryBuilder.prototype,
+      synchronousQueryResultsMethods,
     );
 
     filteredSelfReferenceQueryBuilderMethods.forEach((method: any) => {
@@ -170,6 +175,13 @@ export class MockTypeORM {
 
     filteredQueryBuilderReturnMethods.forEach((method: any) => {
       Sinon.stub(SelectQueryBuilder.prototype, method).callsFake(async function () {
+        const repositoryName = this.__repositoryName;
+        return mockMethod(self, method, repositoryName);
+      });
+    });
+
+    syncQueryBuilderReturnMethods.forEach((method: any) => {
+      Sinon.stub(SelectQueryBuilder.prototype, method).callsFake(function () {
         const repositoryName = this.__repositoryName;
         return mockMethod(self, method, repositoryName);
       });
