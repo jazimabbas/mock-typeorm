@@ -1,13 +1,13 @@
 {
   "name": "mock-typeorm",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Never hit the database again while testing",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
-  "types": "./dist/types/index.d.ts",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
+      "types": "./dist/index.d.ts",
       "require": "./dist/cjs/index.js",
       "import": "./dist/esm/index.js"
     }
@@ -21,7 +21,7 @@
   },
   "scripts": {
     "build:types": "tsc -p tsconfig.package.json --emitDeclarationOnly",
-    "build": "npm run lint && rimraf ./dist && npm run build:types && rollup -c",
+    "build": "npm run lint && rimraf ./dist && npm run build:types && rollup -c && rimraf ./dist/types",
     "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:ui": "vitest --ui",
@@ -62,6 +62,7 @@
     "prettier": "^3.3.2",
     "rimraf": "^6.0.1",
     "rollup": "^4.32.0",
+    "rollup-plugin-dts": "^6.1.1",
     "typescript": "^5.7.3",
     "vitest": "^3.0.4"
   }

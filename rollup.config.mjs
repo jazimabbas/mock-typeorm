@@ -1,5 +1,6 @@
 import typescript from "@rollup/plugin-typescript";
 import { defineConfig } from "rollup";
+import dts from "rollup-plugin-dts";
 
 /** @type {import('@rollup/plugin-typescript').RollupTypescriptOptions} */
 const typescriptOptions = {
@@ -23,5 +24,13 @@ export default defineConfig([
     input: "src/index.ts",
     output: { file: "dist/cjs/index.js", format: "cjs" },
     plugins: [typescript(typescriptOptions)],
+  },
+  {
+    input: "dist/types/index.d.ts",
+    output: {
+      file: "dist/index.d.ts",
+      format: "es",
+    },
+    plugins: [dts()],
   },
 ]);
