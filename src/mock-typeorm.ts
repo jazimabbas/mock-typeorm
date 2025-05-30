@@ -32,6 +32,7 @@ export class MockTypeORM {
   mocks: MockState;
   mockHistory: MockHistory;
   __internal: any;
+  repositories: Record<string, any> = {};
 
   constructor() {
     this.mocks = {};
@@ -42,8 +43,8 @@ export class MockTypeORM {
     this.mockCreateQueryRunner();
     this.mockCreateQueryBuilder();
     this.mockSelectQueryBuilderMethods();
-    this.mockRepositoryMethods();
     this.mockEntityManagerMethods();
+    this.mockGetRepository();
   }
 
   onMock(repository: string | Constructor<any>): SetMock {
@@ -96,6 +97,26 @@ export class MockTypeORM {
 
   restore() {
     Sinon.restore();
+  }
+
+  private mockGetRepository() {
+    const self = this;
+    if (DataSource.prototype.getRepository) {
+      Sinon.stub(DataSource.prototype, "getRepository").callsFake(function (
+        this: any,
+        target: any,
+      ) {
+        return self.createMockRepository(target, this.manager);
+      });
+    }
+    if (EntityManager.prototype.getRepository) {
+      Sinon.stub(EntityManager.prototype, "getRepository").callsFake(function (
+        this: any,
+        target: any,
+      ) {
+        return self.createMockRepository(target, this);
+      });
+    }
   }
 
   private mockDataSouceMethods() {
@@ -188,18 +209,39 @@ export class MockTypeORM {
     });
   }
 
-  private mockRepositoryMethods() {
+  private createMockRepository(target: any, manager: any) {
     const self = this;
+
+    const repositoryName = this.getRepositoryName(target, target?.name);
+    if (this.repositories[repositoryName]) {
+      return this.repositories[repositoryName];
+    }
+
+    const repository = {
+      target,
+      manager,
+    };
+    this.repositories[repositoryName] = repository;
 
     const filteredRepositoryMethods = retrieveAvailableMethods(
       Repository.prototype,
       repositoryMethods,
     );
 
+    if (Repository.prototype.createQueryBuilder) {
+      repository["createQueryBuilder"] = () => {};
+      Sinon.stub(repository, "createQueryBuilder").callsFake(function (this: any) {
+        const repositoryName = self.getRepositoryName(
+          this?.target,
+          this?.target?.name,
+        );
+        return mockCreateQueryBuilder.call(this, repositoryName);
+      });
+    }
+
     filteredRepositoryMethods.forEach((method) => {
-      Sinon.stub(Repository.prototype, method as any).callsFake(function (
-        this: any,
-      ) {
+      repository[method] = () => {};
+      Sinon.stub(repository, method as any).callsFake(function (this: any) {
         const repositoryName = self.getRepositoryName(
           this?.target,
           this?.target?.name ?? "",
@@ -215,6 +257,8 @@ export class MockTypeORM {
         });
       });
     });
+
+    return repository;
   }
 
   private mockEntityManagerMethods() {

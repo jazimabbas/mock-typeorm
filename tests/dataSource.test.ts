@@ -1,6 +1,6 @@
 import { DataSource } from "typeorm";
 import { describe, afterEach, it, expect } from "vitest";
-import Sinon, { SinonStub } from "sinon";
+import Sinon, { SinonSpy, SinonStub } from "sinon";
 import { dataSource, Role, UserEntitySchema } from "./utils/mock";
 import { MockTypeORM } from "../src";
 import { queryRunnerMethods } from "../src/constants/query-runner";
@@ -12,14 +12,17 @@ describe("DataSource", () => {
   });
 
   describe("createQueryRunner()", () => {
-    it.each(queryRunnerMethods)("should mock queryRunner method '%s'", async (method) => {
-      new MockTypeORM();
+    it.each(queryRunnerMethods)(
+      "should mock queryRunner method '%s'",
+      async (method) => {
+        new MockTypeORM();
 
-      const queryRunner = dataSource.createQueryRunner();
-      await (queryRunner[method] as any)();
+        const queryRunner = dataSource.createQueryRunner();
+        await (queryRunner[method] as any)();
 
-      expect((queryRunner[method] as SinonStub).callCount).toEqual(1);
-    });
+        expect((queryRunner[method] as SinonStub).callCount).toEqual(1);
+      },
+    );
 
     it("should return correct payload with manager methods", async () => {
       const mockRole = { id: "1", name: "a" };
@@ -46,7 +49,9 @@ describe("DataSource", () => {
         const queryRunner = dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
-        const user = await queryRunner.manager.findOne(UserEntitySchema as any, { where: {} });
+        const user = await queryRunner.manager.findOne(UserEntitySchema as any, {
+          where: {},
+        });
         await queryRunner.commitTransaction();
         await queryRunner.release();
 
@@ -61,7 +66,9 @@ describe("DataSource", () => {
         const queryRunner = dataSource.createQueryRunner();
         await queryRunner.connect();
         await queryRunner.startTransaction();
-        const user = await queryRunner.manager.findOne("UserEntitySchema" as any, { where: {} });
+        const user = await queryRunner.manager.findOne("UserEntitySchema" as any, {
+          where: {},
+        });
         await queryRunner.commitTransaction();
         await queryRunner.release();
 
@@ -89,7 +96,7 @@ describe("DataSource", () => {
       const typeorm = new MockTypeORM();
       typeorm.onMock(Role).toReturn(mockRoles, "find");
 
-      const roles= await dataSource.transaction(async (manager) => {
+      const roles = await dataSource.transaction(async (manager) => {
         return await manager.find(Role, {});
       });
 
@@ -99,11 +106,11 @@ describe("DataSource", () => {
     it("should propagate exceptions", async () => {
       new MockTypeORM();
 
-      const promise= dataSource.transaction(async (manager) => {
-        throw Error("bad")
+      const promise = dataSource.transaction(async (manager) => {
+        throw Error("bad");
       });
 
-      await expect(promise).rejects.toThrow("bad")
+      await expect(promise).rejects.toThrow("bad");
     });
 
     it("should run method inside transaction with isolation level passed in", async () => {
@@ -124,9 +131,12 @@ describe("DataSource", () => {
       const typeorm = new MockTypeORM();
       typeorm.onMock(Role).toReturn(mockRoles, "find");
 
-      const roles = await dataSource.manager.transaction("READ COMMITTED", async (manager) => {
-        return await manager.find(Role, {});
-      });
+      const roles = await dataSource.manager.transaction(
+        "READ COMMITTED",
+        async (manager) => {
+          return await manager.find(Role, {});
+        },
+      );
 
       expect(roles).toEqual(mockRoles);
     });
@@ -187,6 +197,56 @@ describe("DataSource", () => {
       await setup();
 
       expect((DataSource.prototype[method] as SinonStub).callCount).toEqual(1);
+    });
+  });
+
+  describe("stuff", () => {
+    it("should work", async () => {
+      const typeorm = new MockTypeORM();
+
+      typeorm.onMock("Things").toReturn({ name: "thing" }, "findOne");
+      const thingsRepo = dataSource.getRepository("Things");
+      const result = await thingsRepo.findOne({
+        where: { id: "thingId" },
+      });
+      expect(result).toEqual({ name: "thing" });
+
+      typeorm.onMock("Stuff").toReturn({ name: "stuff" }, "findOne");
+      const stuffRepo = dataSource.getRepository("Stuff");
+      const result2 = await stuffRepo.findOne({
+        where: { id: "stuffId" },
+      });
+      expect(result2).toEqual({ name: "stuff" });
+
+      expect(
+        (thingsRepo.findOne as SinonSpy).calledWith({
+          where: { id: "thingId" },
+        }),
+      ).toBeTruthy();
+      expect(
+        (stuffRepo.findOne as SinonSpy).calledWith({
+          where: { id: "stuffId" },
+        }),
+      ).toBeTruthy();
+
+      expect(thingsRepo.manager.getRepository("Things")).not.toBe(
+        thingsRepo.manager.getRepository("Stuff"),
+      );
+      expect(thingsRepo.manager.getRepository("Things").findOne).not.toBe(
+        thingsRepo.manager.getRepository("Stuff").findOne,
+      );
+      expect(thingsRepo.manager.getRepository("Things").findOne).toBe(
+        thingsRepo.manager.getRepository("Things").findOne,
+      );
+      expect(thingsRepo.manager.getRepository("Things")).toBe(
+        thingsRepo.manager.getRepository("Things"),
+      );
+
+      expect(
+        (thingsRepo.findOne as SinonSpy).calledWith({
+          where: { id: "stuffId" },
+        }),
+      ).toBeFalsy();
     });
   });
 });
